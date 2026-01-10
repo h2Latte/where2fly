@@ -5,6 +5,10 @@
       "Bash(git config:*)",
       "Bash(ls:*)",
       "Bash(npm run build:*)"
+      "Bash(ls:*)",
+      "WebSearch",
+      "WebFetch(domain:federation.ffvl.fr)",
+      "WebFetch(domain:www.paralaile62.fr)"
     ]
   }
 }
