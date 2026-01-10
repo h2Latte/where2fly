@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
 import { MeteoService } from '../../services/meteo.service';
 import { Site, SiteForecast } from '../../models/meteo.models';
 
@@ -15,7 +16,8 @@ import { Site, SiteForecast } from '../../models/meteo.models';
     MatProgressSpinnerModule,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatChipsModule
   ],
   templateUrl: './meteo-table.component.html',
   styleUrl: './meteo-table.component.scss'
@@ -145,25 +147,88 @@ export class MeteoTableComponent implements OnInit {
   ];
 
   forecasts = signal<SiteForecast[]>([]);
-  loading = signal<boolean>(true);
+  loading = signal<boolean>(false);
   lastUpdate = signal<Date>(new Date());
   weekOffset = signal<number>(0);
   error = signal<string | null>(null);
+
+  // Sélection des sites (max 3)
+  readonly maxSelectedSites = 3;
+  private readonly STORAGE_KEY = 'razmotte_selected_sites';
+  selectedSiteIds = signal<string[]>(this.loadSelectedFromStorage());
+
+  // Sites sélectionnés
+  selectedSites = computed(() =>
+    this.sites.filter(s => this.selectedSiteIds().includes(s.id))
+  );
 
   // Limite de l'API Open-Meteo : 16 jours max
   readonly maxWeekOffset = 2;
 
   ngOnInit(): void {
-    this.loadForecasts();
+    if (this.selectedSiteIds().length > 0) {
+      this.loadForecasts();
+    }
+  }
+
+  private loadSelectedFromStorage(): string[] {
+    const stored = localStorage.getItem(this.STORAGE_KEY);
+    if (stored) {
+      try {
+        const ids = JSON.parse(stored) as string[];
+        return ids.slice(0, this.maxSelectedSites);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  }
+
+  private saveSelectedToStorage(): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.selectedSiteIds()));
+  }
+
+  isSiteSelected(siteId: string): boolean {
+    return this.selectedSiteIds().includes(siteId);
+  }
+
+  canSelectMore(): boolean {
+    return this.selectedSiteIds().length < this.maxSelectedSites;
+  }
+
+  toggleSite(siteId: string): void {
+    const current = this.selectedSiteIds();
+    if (current.includes(siteId)) {
+      // Désélectionner
+      this.selectedSiteIds.set(current.filter(id => id !== siteId));
+    } else if (current.length < this.maxSelectedSites) {
+      // Sélectionner si pas au max
+      this.selectedSiteIds.set([...current, siteId]);
+    }
+    this.saveSelectedToStorage();
+
+    // Recharger les prévisions si on a des sites sélectionnés
+    if (this.selectedSiteIds().length > 0) {
+      this.forecasts.set([]);
+      this.loadForecasts();
+    } else {
+      this.forecasts.set([]);
+    }
   }
 
   loadForecasts(): void {
+    const sitesToLoad = this.selectedSites();
+    if (sitesToLoad.length === 0) {
+      this.loading.set(false);
+      return;
+    }
+
     this.loading.set(true);
     this.error.set(null);
     const startDate = this.getStartDate();
 
-    // Charger les prévisions pour chaque site
-    this.sites.forEach(site => {
+    // Charger les prévisions pour les sites sélectionnés uniquement
+    sitesToLoad.forEach(site => {
       this.meteoService.getForecast(site, startDate).subscribe({
         next: (forecast) => {
           this.forecasts.update(current => {

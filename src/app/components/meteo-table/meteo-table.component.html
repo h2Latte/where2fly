@@ -4,7 +4,7 @@
     <div class="header-left">
       <div class="logo">🪂</div>
       <div class="title-block">
-        <h1>RazMotte</h1>
+        <h1>Where 2 fly</h1>
         <p>Météo des sites du Nord-Pas-de-Calais</p>
       </div>
     </div>
@@ -29,6 +29,28 @@
       </button>
     </div>
   </header>
+
+  <!-- Sélecteur de sites -->
+  <div class="site-selector">
+    <div class="selector-header">
+      <span class="selector-label">Sites ({{ selectedSiteIds().length }}/{{ maxSelectedSites }}) :</span>
+    </div>
+    <div class="site-chips">
+      @for (site of sites; track site.id) {
+        <button
+          class="site-chip"
+          [class.selected]="isSiteSelected(site.id)"
+          [disabled]="!isSiteSelected(site.id) && !canSelectMore()"
+          (click)="toggleSite(site.id)"
+        >
+          {{ site.name }}
+          @if (isSiteSelected(site.id)) {
+            <mat-icon class="check-icon">check</mat-icon>
+          }
+        </button>
+      }
+    </div>
+  </div>
 
   <!-- Légende -->
   <div class="legend">
@@ -63,6 +85,15 @@
         <mat-icon>refresh</mat-icon>
         Réessayer
       </button>
+    </div>
+  }
+
+  <!-- No sites selected -->
+  @if (!loading() && !error() && selectedSiteIds().length === 0) {
+    <div class="empty-state">
+      <mat-icon>place</mat-icon>
+      <span class="empty-title">Aucun site sélectionné</span>
+      <span class="empty-message">Sélectionnez jusqu'à {{ maxSelectedSites }} sites ci-dessus pour voir les prévisions météo.</span>
     </div>
   }
 
@@ -127,6 +158,6 @@
 
   <!-- Footer -->
   <footer class="footer">
-    RazMotte © 2026 • Données Open-Meteo • À titre indicatif
+    Where2Fly © 2026 • Données Open-Meteo • À titre indicatif
   </footer>
 </div>

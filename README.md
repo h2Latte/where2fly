@@ -1,4 +1,4 @@
-# RazMotte - Météo Parapente
+# Where2fly - Météo Parapente
 
 ## Contexte du projet
 Application web pour le club de parapente RazMotte (Nord-Pas-de-Calais) permettant de visualiser les conditions météo sur différents sites de vol.
