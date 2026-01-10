@@ -3,7 +3,8 @@
     "allow": [
       "Bash(gh repo create:*)",
       "Bash(git config:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }
