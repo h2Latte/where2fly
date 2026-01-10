@@ -1,0 +1,132 @@
+<div class="meteo-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">🪂</div>
+      <div class="title-block">
+        <h1>RazMotte</h1>
+        <p>Météo des sites du Nord-Pas-de-Calais</p>
+      </div>
+    </div>
+    <div class="week-nav">
+      <button mat-icon-button (click)="previousWeek()" [disabled]="weekOffset() === 0" matTooltip="Semaine précédente">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="week-label">{{ getWeekLabel() }}</span>
+      <button mat-icon-button (click)="nextWeek()" [disabled]="weekOffset() >= maxWeekOffset" matTooltip="Semaine suivante">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+    <div class="header-right">
+      <span class="last-update">
+        Mis à jour : {{ lastUpdate() | date:'dd/MM/yyyy HH:mm' }}
+      </span>
+      <button mat-icon-button (click)="refresh()" matTooltip="Rafraîchir">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Paramètres">
+        <mat-icon>settings</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- Légende -->
+  <div class="legend">
+    <div class="legend-group">
+      <span class="legend-label">Conditions :</span>
+      <span class="legend-item"><span class="dot good"></span> Vol OK</span>
+      <span class="legend-item"><span class="dot moderate"></span> Limite</span>
+      <span class="legend-item"><span class="dot bad"></span> Déconseillé</span>
+    </div>
+    <div class="legend-group">
+      <span class="legend-label">Direction :</span>
+      <span class="dir-badge good">DIR</span> Favorable
+      <span class="dir-badge bad">DIR</span> Défavorable
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Chargement des prévisions...</span>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="error-container">
+      <mat-icon>error_outline</mat-icon>
+      <span class="error-title">Erreur</span>
+      <span class="error-message">{{ error() }}</span>
+      <button mat-stroked-button (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+        Réessayer
+      </button>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (!loading() && !error() && forecasts().length > 0) {
+    <div class="table-wrapper">
+      <table class="meteo-table">
+        <thead>
+        <tr>
+          <th class="site-header">Site</th>
+          <th class="slot-header">h</th>
+          @for (day of forecasts()[0].days; track day.label) {
+            <th class="day-header">{{ day.label }}</th>
+          }
+        </tr>
+        </thead>
+        <tbody>
+          @for (forecast of forecasts(); track forecast.site.id) {
+            <tr>
+              <!-- Site info -->
+              <td class="site-cell">
+                <div class="site-name">{{ forecast.site.name }}</div>
+                <div class="site-orientations">
+                  @for (dir of forecast.site.orientations; track dir) {
+                    <span class="orientation-badge">{{ dir }}</span>
+                  }
+                </div>
+              </td>
+
+              <!-- Slot labels -->
+              <td class="slots-label-cell">
+                @for (slot of [0, 1, 2]; track slot) {
+                  <div class="slot-label">{{ getSlotLabel(slot) }}</div>
+                }
+              </td>
+
+              <!-- Day columns -->
+              @for (day of forecast.days; track day.label) {
+                <td class="day-cell">
+                  @for (slot of day.slots; track $index) {
+                    <div class="slot-card" [class]="slot.condition">
+                      <div class="slot-top">
+                        <span class="direction" [class.ok]="slot.isDirectionOk" [class.bad]="!slot.isDirectionOk">
+                          {{ slot.direction }}
+                        </span>
+                        <span class="temp-rain">{{ slot.temp }}° {{ slot.rain }}mm</span>
+                      </div>
+                      <div class="slot-wind">
+                        {{ slot.wind }}<span class="separator">/</span><span class="gust">{{ slot.gust }}</span>
+                        <span class="unit">km/h</span>
+                      </div>
+                    </div>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Footer -->
+  <footer class="footer">
+    RazMotte © 2026 • Données Open-Meteo • À titre indicatif
+  </footer>
+</div>
