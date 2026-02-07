@@ -11,22 +11,6 @@ Inspiré de : https://razmotte.org/meteonew/
 - **SCSS** pour les styles
 - **API Open-Meteo** (gratuite, sans clé) pour les données météo
 
-## Structure actuelle
-```
-src/app/
-├── models/
-│   └── meteo.models.ts      # Interfaces TypeScript
-├── services/
-│   └── meteo.service.ts     # Appels API Open-Meteo
-├── components/
-│   └── meteo-table/         # Composant principal tableau météo
-│       ├── meteo-table.component.ts
-│       ├── meteo-table.component.html
-│       └── meteo-table.component.scss
-├── app.component.ts
-└── app.config.ts
-```
-
 ## Sites de vol intégrés
 
 | Site | Latitude | Longitude | Orientations favorables | Vent idéal |
