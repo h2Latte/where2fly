@@ -22,9 +22,15 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "*",
+                "output": "media/",
+                "input": "node_modules/leaflet/dist/images"
               }
             ],
             "styles": [
+              "node_modules/leaflet/dist/leaflet.css",
               "src/material-theme.scss",
               "src/styles.scss"
             ],
@@ -37,16 +43,16 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "600kB",
                   "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "6kB",
+                  "maximumError": "10kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "bundles"
             },
             "development": {
               "optimization": false,

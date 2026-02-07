@@ -1,6 +1,15 @@
 <div class="site-selector">
   <div class="selector-header">
     <span class="selector-label">Sites ({{ selectedSiteIds().length }}/{{ maxSelectedSites() }}) :</span>
+    <div class="week-nav">
+      <button mat-icon-button (click)="previousWeek.emit()" [disabled]="weekOffset() === 0" matTooltip="Semaine précédente">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="week-label">{{ getWeekLabel() }}</span>
+      <button mat-icon-button (click)="nextWeek.emit()" [disabled]="weekOffset() >= maxWeekOffset()" matTooltip="Semaine suivante">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
   </div>
   <div class="site-chips">
     @for (site of sites(); track site.id) {

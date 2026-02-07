@@ -3,9 +3,7 @@ import { MeteoTableComponent } from './components/meteo-table/meteo-table.compon
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [MeteoTableComponent],
   template: `<app-meteo-table />`,
-  styles: []
 })
 export class App {}

@@ -1,33 +1,38 @@
 <div class="page-container">
   <app-header
-    [weekOffset]="weekOffset()"
-    [maxWeekOffset]="maxWeekOffset"
     [lastUpdate]="lastUpdate()"
-    (previousWeek)="previousWeek()"
-    (nextWeek)="nextWeek()"
     (refresh)="refresh()"
   />
 
-  <app-site-selector
-    [sites]="sites"
-    [selectedSiteIds]="selectedSiteIds()"
-    [maxSelectedSites]="maxSelectedSites"
-    (toggleSite)="toggleSite($event)"
-  />
-
-  <!-- Légende -->
+  <!-- Toggle carte / tableau -->
   <div class="legend">
+    <div class="view-toggle">
+      <button mat-icon-button
+        [class.active]="viewMode() === 'map'"
+        (click)="setViewMode('map')"
+        matTooltip="Vue carte">
+        <mat-icon>map</mat-icon>
+      </button>
+      <button mat-icon-button
+        [class.active]="viewMode() === 'table'"
+        (click)="setViewMode('table')"
+        matTooltip="Vue tableau">
+        <mat-icon>table_chart</mat-icon>
+      </button>
+    </div>
     <div class="legend-group">
       <span class="legend-label">Conditions :</span>
       <span class="legend-item"><span class="dot good"></span> Vol OK</span>
       <span class="legend-item"><span class="dot moderate"></span> Limite</span>
       <span class="legend-item"><span class="dot bad"></span> Déconseillé</span>
     </div>
-    <div class="legend-group">
-      <span class="legend-label">Direction :</span>
-      <span class="dir-badge good">DIR</span> Favorable
-      <span class="dir-badge bad">DIR</span> Défavorable
-    </div>
+    @if (viewMode() === 'table') {
+      <div class="legend-group">
+        <span class="legend-label">Direction :</span>
+        <span class="dir-badge good">DIR</span> Favorable
+        <span class="dir-badge bad">DIR</span> Défavorable
+      </div>
+    }
   </div>
 
   <!-- Loading -->
@@ -51,72 +56,87 @@
     </div>
   }
 
-  <!-- No sites selected -->
-  @if (!loading() && !error() && selectedSiteIds().length === 0) {
-    <div class="empty-state">
-      <mat-icon>place</mat-icon>
-      <span class="empty-title">Aucun site sélectionné</span>
-      <span class="empty-message">Sélectionnez jusqu'à {{ maxSelectedSites }} sites ci-dessus pour voir les prévisions météo.</span>
-    </div>
+  <!-- Mode carte -->
+  @if (viewMode() === 'map') {
+    <app-site-map
+      [sites]="sites"
+      [forecasts]="forecasts()"
+    />
   }
 
-  <!-- Table -->
-  @if (!loading() && !error() && forecasts().length > 0) {
-    <div class="table-wrapper">
-      <table class="meteo-table">
-        <thead>
-        <tr>
-          <th class="site-header">Site</th>
-          <th class="slot-header">h</th>
-          @for (day of forecasts()[0].days; track day.label) {
-            <th class="day-header">{{ day.label }}</th>
-          }
-        </tr>
-        </thead>
-        <tbody>
-          @for (forecast of forecasts(); track forecast.site.id) {
-            <tr>
-              <!-- Site info -->
-              <td class="site-cell">
-                <div class="site-name">{{ forecast.site.name }}</div>
-                <div class="site-orientations">
-                  @for (dir of forecast.site.orientations; track dir) {
-                    <span class="orientation-badge">{{ dir }}</span>
-                  }
-                </div>
-              </td>
+  <!-- Mode tableau -->
+  @if (viewMode() === 'table') {
+    <app-site-selector
+      [sites]="sites"
+      [selectedSiteIds]="selectedSiteIds()"
+      [maxSelectedSites]="maxSelectedSites"
+      [weekOffset]="weekOffset()"
+      [maxWeekOffset]="maxWeekOffset"
+      (toggleSite)="toggleSite($event)"
+      (previousWeek)="previousWeek()"
+      (nextWeek)="nextWeek()"
+    />
 
-              <!-- Slot labels -->
-              <td class="slots-label-cell">
-                @for (slot of [0, 1, 2]; track slot) {
-                  <div class="slot-label">{{ getSlotLabel(slot) }}</div>
-                }
-              </td>
+    @if (!loading() && !error() && selectedSiteIds().length === 0) {
+      <div class="empty-state">
+        <mat-icon>place</mat-icon>
+        <span class="empty-title">Aucun site sélectionné</span>
+        <span class="empty-message">Sélectionnez jusqu'à {{ maxSelectedSites }} sites ci-dessus pour voir les prévisions météo.</span>
+      </div>
+    }
 
-              <!-- Day columns -->
-              @for (day of forecast.days; track day.label) {
-                <td class="day-cell">
-                  @for (slot of day.slots; track $index) {
-                    <div class="slot-card" [class]="slot.condition">
-                      <div class="slot-top">
-                        <span class="direction" [class.ok]="slot.isDirectionOk" [class.bad]="!slot.isDirectionOk">
-                          {{ slot.direction }}
-                        </span>
-                        <span class="temp-rain">{{ slot.temp }}° {{ slot.rain }}mm</span>
-                      </div>
-                      <div class="slot-wind">
-                        {{ slot.wind }}<span class="separator">/</span><span class="gust">{{ slot.gust }}</span>
-                        <span class="unit">km/h</span>
-                      </div>
-                    </div>
+    @if (!loading() && !error() && forecasts().length > 0) {
+      <div class="table-wrapper">
+        <table class="meteo-table">
+          <thead>
+          <tr>
+            <th class="site-header">Site</th>
+            <th class="slot-header">h</th>
+            @for (day of forecasts()[0].days; track day.label) {
+              <th class="day-header">{{ day.label }}</th>
+            }
+          </tr>
+          </thead>
+          <tbody>
+            @for (forecast of forecasts(); track forecast.site.id) {
+              <tr>
+                <td class="site-cell">
+                  <div class="site-name">{{ forecast.site.name }}</div>
+                  <div class="site-orientations">
+                    @for (dir of forecast.site.orientations; track dir) {
+                      <span class="orientation-badge">{{ dir }}</span>
+                    }
+                  </div>
+                </td>
+                <td class="slots-label-cell">
+                  @for (slot of [0, 1, 2]; track slot) {
+                    <div class="slot-label">{{ getSlotLabel(slot) }}</div>
                   }
                 </td>
-              }
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+                @for (day of forecast.days; track day.label) {
+                  <td class="day-cell">
+                    @for (slot of day.slots; track $index) {
+                      <div class="slot-card" [class]="slot.condition">
+                        <div class="slot-top">
+                          <span class="direction" [class.ok]="slot.isDirectionOk" [class.bad]="!slot.isDirectionOk">
+                            {{ slot.direction }}
+                          </span>
+                          <span class="temp-rain">{{ slot.temp }}° {{ slot.rain }}mm</span>
+                        </div>
+                        <div class="slot-wind">
+                          {{ slot.wind }}<span class="separator">/</span><span class="gust">{{ slot.gust }}</span>
+                          <span class="unit">km/h</span>
+                        </div>
+                      </div>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   }
 
   <!-- Footer -->

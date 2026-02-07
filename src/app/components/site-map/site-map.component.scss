@@ -1,0 +1,13 @@
+@use 'variables' as *;
+
+:host {
+  display: block;
+}
+
+.site-map {
+  height: 65vh;
+  min-height: 400px;
+  border-radius: 12px;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
