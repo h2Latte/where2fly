@@ -1,56 +1,19 @@
 <div class="page-container">
-  <!-- Header -->
-  <header class="header">
-    <div class="header-left">
-      <div class="logo">🪂</div>
-      <div class="title-block">
-        <h1>Where 2 fly</h1>
-        <p>Météo des sites du Nord-Pas-de-Calais</p>
-      </div>
-    </div>
-    <div class="week-nav">
-      <button mat-icon-button (click)="previousWeek()" [disabled]="weekOffset() === 0" matTooltip="Semaine précédente">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-      <span class="week-label">{{ getWeekLabel() }}</span>
-      <button mat-icon-button (click)="nextWeek()" [disabled]="weekOffset() >= maxWeekOffset" matTooltip="Semaine suivante">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
-    </div>
-    <div class="header-right">
-      <span class="last-update">
-        Mis à jour : {{ lastUpdate() | date:'dd/MM/yyyy HH:mm' }}
-      </span>
-      <button mat-icon-button (click)="refresh()" matTooltip="Rafraîchir">
-        <mat-icon>refresh</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Paramètres">
-        <mat-icon>settings</mat-icon>
-      </button>
-    </div>
-  </header>
+  <app-header
+    [weekOffset]="weekOffset()"
+    [maxWeekOffset]="maxWeekOffset"
+    [lastUpdate]="lastUpdate()"
+    (previousWeek)="previousWeek()"
+    (nextWeek)="nextWeek()"
+    (refresh)="refresh()"
+  />
 
-  <!-- Sélecteur de sites -->
-  <div class="site-selector">
-    <div class="selector-header">
-      <span class="selector-label">Sites ({{ selectedSiteIds().length }}/{{ maxSelectedSites }}) :</span>
-    </div>
-    <div class="site-chips">
-      @for (site of sites; track site.id) {
-        <button
-          class="site-chip"
-          [class.selected]="isSiteSelected(site.id)"
-          [disabled]="!isSiteSelected(site.id) && !canSelectMore()"
-          (click)="toggleSite(site.id)"
-        >
-          {{ site.name }}
-          @if (isSiteSelected(site.id)) {
-            <mat-icon class="check-icon">check</mat-icon>
-          }
-        </button>
-      }
-    </div>
-  </div>
+  <app-site-selector
+    [sites]="sites"
+    [selectedSiteIds]="selectedSiteIds()"
+    [maxSelectedSites]="maxSelectedSites"
+    (toggleSite)="toggleSite($event)"
+  />
 
   <!-- Légende -->
   <div class="legend">
