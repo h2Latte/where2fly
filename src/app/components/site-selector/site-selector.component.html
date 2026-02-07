@@ -1,0 +1,20 @@
+<div class="site-selector">
+  <div class="selector-header">
+    <span class="selector-label">Sites ({{ selectedSiteIds().length }}/{{ maxSelectedSites() }}) :</span>
+  </div>
+  <div class="site-chips">
+    @for (site of sites(); track site.id) {
+      <button
+        class="site-chip"
+        [class.selected]="isSiteSelected(site.id)"
+        [disabled]="!isSiteSelected(site.id) && !canSelectMore()"
+        (click)="toggleSite.emit(site.id)"
+      >
+        {{ site.name }}
+        @if (isSiteSelected(site.id)) {
+          <mat-icon class="check-icon">check</mat-icon>
+        }
+      </button>
+    }
+  </div>
+</div>

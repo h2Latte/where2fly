@@ -4,11 +4,12 @@
       "Bash(gh repo create:*)",
       "Bash(git config:*)",
       "Bash(ls:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
       "Bash(ls:*)",
       "WebSearch",
       "WebFetch(domain:federation.ffvl.fr)",
-      "WebFetch(domain:www.paralaile62.fr)"
+      "WebFetch(domain:www.paralaile62.fr)",
+      "Bash(npx ng build:*)"
     ]
   }
 }
