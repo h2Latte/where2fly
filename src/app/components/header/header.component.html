@@ -1,0 +1,26 @@
+<header class="header">
+  <div class="header-left">
+    <div class="logo">🪂</div>
+    <div class="title-block">
+      <h1>Where 2 fly</h1>
+      <p>Météo des sites du Nord-Pas-de-Calais</p>
+    </div>
+  </div>
+  <div class="week-nav">
+    <button mat-icon-button (click)="previousWeek.emit()" [disabled]="weekOffset() === 0" matTooltip="Semaine précédente">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <span class="week-label">{{ getWeekLabel() }}</span>
+    <button mat-icon-button (click)="nextWeek.emit()" [disabled]="weekOffset() >= maxWeekOffset()" matTooltip="Semaine suivante">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+  <div class="header-right">
+    <span class="last-update">
+      Mis à jour : {{ lastUpdate() | date:'dd/MM/yyyy HH:mm' }}
+    </span>
+    <button mat-icon-button (click)="refresh.emit()" matTooltip="Rafraîchir">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+</header>
