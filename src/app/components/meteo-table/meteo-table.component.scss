@@ -72,6 +72,22 @@
   }
 }
 
+// Contrôles carte
+.map-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  input, select {
+    padding: 8px 12px;
+    border: 1px solid $border-light;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: $bg-card;
+    color: $text-primary;
+  }
+}
+
 // États
 .loading {
   display: flex;

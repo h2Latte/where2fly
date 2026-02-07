@@ -58,9 +58,18 @@
 
   <!-- Mode carte -->
   @if (viewMode() === 'map') {
+    <div class="map-controls">
+      <input type="date" [ngModel]="mapDate()" (ngModelChange)="onMapDateChange($event)" />
+      <select [ngModel]="mapHour()" (ngModelChange)="onMapHourChange(+$event)">
+        <option [value]="9">9h</option>
+        <option [value]="12">12h</option>
+        <option [value]="15">15h</option>
+      </select>
+    </div>
     <app-site-map
       [sites]="sites"
       [forecasts]="forecasts()"
+      [selectedHour]="mapHour()"
     />
   }
 

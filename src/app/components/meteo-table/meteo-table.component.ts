@@ -3,6 +3,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {FormsModule} from '@angular/forms';
+import {forkJoin} from 'rxjs';
 import {MeteoService} from '../../services/meteo-service/meteo.service';
 import {Site, SiteForecast} from '../../models/meteo.models';
 import {AbstractMeteoService} from '../../services/meteo-service/abstract-meteo.service';
@@ -20,6 +22,7 @@ type ViewMode = 'map' | 'table';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
+    FormsModule,
     HeaderComponent,
     SiteSelectorComponent,
     SiteMapComponent,
@@ -43,6 +46,10 @@ export class MeteoTableComponent implements OnInit {
   error = signal<string | null>(null);
   viewMode = signal<ViewMode>('map');
 
+  // Mode carte
+  mapDate = signal<string>(this.todayString());
+  mapHour = signal<number>(12);
+
   // Sélection des sites pour le mode tableau (max 3)
   readonly maxSelectedSites = 3;
   private readonly STORAGE_KEY = 'razmotte_selected_sites';
@@ -55,7 +62,9 @@ export class MeteoTableComponent implements OnInit {
   readonly maxWeekOffset = 2;
 
   ngOnInit(): void {
-    if (this.viewMode() === 'table' && this.selectedSiteIds().length > 0) {
+    if (this.viewMode() === 'map') {
+      this.loadMapForecasts();
+    } else if (this.selectedSiteIds().length > 0) {
       this.loadForecasts();
     }
   }
@@ -68,7 +77,41 @@ export class MeteoTableComponent implements OnInit {
     }
     if (mode === 'map') {
       this.forecasts.set([]);
+      this.loadMapForecasts();
     }
+  }
+
+  // --- Mode carte ---
+
+  loadMapForecasts(): void {
+    const date = new Date(this.mapDate());
+    this.loading.set(true);
+    this.error.set(null);
+    this.forecasts.set([]);
+
+    const requests = this.sites.map(site => this.meteoService.getForecast(site, date));
+
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        this.forecasts.set(results);
+        this.loading.set(false);
+        this.lastUpdate.set(new Date());
+      },
+      error: (err) => {
+        console.error('Erreur chargement carte:', err);
+        this.loading.set(false);
+        this.error.set(err.error?.reason || err.message || 'Erreur lors du chargement');
+      }
+    });
+  }
+
+  onMapDateChange(date: string): void {
+    this.mapDate.set(date);
+    this.loadMapForecasts();
+  }
+
+  onMapHourChange(hour: number): void {
+    this.mapHour.set(hour);
   }
 
   // --- Mode tableau ---
@@ -164,5 +207,9 @@ export class MeteoTableComponent implements OnInit {
 
   private saveSelectedToStorage(): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.selectedSiteIds()));
+  }
+
+  private todayString(): string {
+    return new Date().toISOString().split('T')[0];
   }
 }
