@@ -1,4 +1,36 @@
-// Global styles
 @use 'variables' as *;
-@use 'layout';
-@use 'components';
+
+// Fix : le thème Material interfère avec les tiles Leaflet
+.leaflet-container {
+  img {
+    max-width: none !important;
+    max-height: none !important;
+  }
+
+  .leaflet-tile {
+    box-sizing: content-box !important;
+  }
+}
+
+// Popups Leaflet (DOM hors Angular)
+.site-popup {
+  font-family: Roboto, sans-serif;
+
+  .site-popup-name {
+    font-size: 0.9rem;
+    color: $text-primary;
+  }
+
+  .site-popup-orientations {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: $primary-500;
+    margin-top: 2px;
+  }
+
+  .site-popup-wind {
+    font-size: 0.75rem;
+    color: $text-secondary;
+    margin-top: 4px;
+  }
+}

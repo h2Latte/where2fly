@@ -9,7 +9,9 @@
       "WebSearch",
       "WebFetch(domain:federation.ffvl.fr)",
       "WebFetch(domain:www.paralaile62.fr)",
-      "Bash(npx ng build:*)"
+      "Bash(npx ng build:*)",
+      "Bash(npm install:*)",
+      "Bash(curl -s http://localhost:4201/styles.css)"
     ]
   }
 }
