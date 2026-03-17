@@ -1,0 +1,16 @@
+name = "where2fly-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "where2fly"
+database_id = "032ce5d9-7aea-4299-9c4f-e1c449d91cf9"
+
+[triggers]
+crons = ["0 */1 * * *"]
+
+[observability]
+[observability.logs]
+enabled = true
+invocation_logs = true

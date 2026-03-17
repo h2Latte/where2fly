@@ -1,8 +1,8 @@
-import {Injectable, inject} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { Site, SiteForecast, DayForecast, SlotData, OpenMeteoResponse } from '../../models/meteo.models';
-import {AbstractMeteoService} from './abstract-meteo.service';
+import { Site, SiteForecast, DayForecast, SlotData, WeatherRow } from '../../models/meteo.models';
+import { AbstractMeteoService } from './abstract-meteo.service';
 import {
   calculateCondition,
   degreesToDirection,
@@ -11,45 +11,39 @@ import {
   isDirectionFavorable,
   SLOTS
 } from './meteo-utils';
+import { environment } from '../../../environments/environment';
 
 @Injectable()
-export class MeteoService extends AbstractMeteoService{
+export class MeteoService extends AbstractMeteoService {
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'https://api.open-meteo.com/v1/forecast';
 
   override getForecast(site: Site, startDate?: Date): Observable<SiteForecast> {
     const start = startDate || new Date();
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
 
-    const params: Record<string, string> = {
-      latitude: site.lat.toString(),
-      longitude: site.lon.toString(),
-      hourly: 'temperature_2m,precipitation,windspeed_10m,windgusts_10m,winddirection_10m',
-      timezone: 'Europe/Paris',
+    const params = new URLSearchParams({
       start_date: formatDate(start),
       end_date: formatDate(end)
-    };
+    });
 
-    const url = `${this.API_URL}?${new URLSearchParams(params)}`;
+    const url = `${environment.workerUrl}/forecast/${site.id}?${params}`;
 
-    return this.http.get<OpenMeteoResponse>(url).pipe(
-      map(response => this.transformResponse(response, site))
+    return this.http.get<WeatherRow[]>(url).pipe(
+      map(rows => this.transformResponse(rows, site))
     );
   }
 
-  private transformResponse(response: OpenMeteoResponse, site: Site): SiteForecast {
-    const { hourly } = response;
+  private transformResponse(rows: WeatherRow[], site: Site): SiteForecast {
     const daysMap = new Map<string, DayForecast>();
 
-    hourly.time.forEach((timeStr, index) => {
-      const date = new Date(timeStr);
+    rows.forEach(row => {
+      const date = new Date(row.time);
       const hour = date.getHours();
 
-      // On ne garde que les créneaux 9h, 12h, 15h
       if (!SLOTS.includes(hour)) return;
 
-      const dayKey = date.toISOString().split('T')[0];
+      const dayKey = row.time.split('T')[0];
 
       if (!daysMap.has(dayKey)) {
         daysMap.set(dayKey, {
@@ -59,9 +53,9 @@ export class MeteoService extends AbstractMeteoService{
         });
       }
 
-      const direction = degreesToDirection(hourly.winddirection_10m[index]);
-      const wind = Math.round(hourly.windspeed_10m[index]);
-      const gust = Math.round(hourly.windgusts_10m[index]);
+      const direction = degreesToDirection(row.winddirection_10m);
+      const wind = Math.round(row.windspeed_10m);
+      const gust = Math.round(row.windgusts_10m);
       const isDirectionOk = isDirectionFavorable(direction, site.orientations);
 
       const slot: SlotData = {
@@ -69,9 +63,9 @@ export class MeteoService extends AbstractMeteoService{
         wind,
         gust,
         direction,
-        directionDeg: hourly.winddirection_10m[index],
-        temp: Math.round(hourly.temperature_2m[index]),
-        rain: Math.round(hourly.precipitation[index] * 10) / 10,
+        directionDeg: row.winddirection_10m,
+        temp: Math.round(row.temperature_2m),
+        rain: Math.round(row.precipitation * 10) / 10,
         isDirectionOk,
         condition: calculateCondition(wind, gust, isDirectionOk, site)
       };

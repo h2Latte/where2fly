@@ -1,0 +1,18 @@
+{
+  "name": "parapente-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "dev:cron": "wrangler dev --test-scheduled",
+    "db:init-local": "wrangler d1 execute where2fly --local --file=schema_sites.sql && wrangler d1 execute where2fly --local --file=schema.sql",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260317.1",
+    "wrangler": "^4.75.0"
+  },
+  "dependencies": {
+    "hono": "^4.0.0"
+  }
+}
