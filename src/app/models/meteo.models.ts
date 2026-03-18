@@ -43,14 +43,14 @@ export interface SiteForecast {
   days: DayForecast[];
 }
 
-// Réponse de l'API Open-Meteo
-export interface OpenMeteoResponse {
-  hourly: {
-    time: string[];
-    temperature_2m: number[];
-    precipitation: number[];
-    windspeed_10m: number[];
-    windgusts_10m: number[];
-    winddirection_10m: number[];
-  };
+// Réponse du worker (une ligne = une heure)
+export interface WeatherRow {
+  site_id: string;
+  time: string;
+  fetched_at: string;
+  temperature_2m: number;
+  precipitation: number;
+  windspeed_10m: number;
+  windgusts_10m: number;
+  winddirection_10m: number;
 }
